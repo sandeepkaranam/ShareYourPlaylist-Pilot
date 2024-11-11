@@ -1,0 +1,60 @@
+﻿@model ShareYourPlaylist.Models.CreatePlaylistViewModel
+
+<div class="container">
+    <h1>Create a New Playlist</h1>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <!-- Form to add Spotify URI for each song -->
+    <form asp-action="AddSongUriToTemporaryList" method="post" class="mb-4">
+        <div class="form-group">
+            <label for="songUri">Add Song by Spotify URI</label>
+            <input type="text" id="songUri" name="songUri" class="form-control" placeholder="spotify:track:TRACK_ID" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Add Song</button>
+    </form>
+
+    <hr />
+
+    <!-- Display List of Added Spotify URIs -->
+    <h2>Added Songs</h2>
+    <ul class="list-group mb-4">
+        @foreach (var uri in Model.SongUris)
+        {
+            <li class="list-group-item">
+                <strong>Spotify URI:</strong> @uri
+            </li>
+        }
+    </ul>
+
+    <hr />
+
+    <!-- Form to finalize and create the playlist -->
+    <h2>Playlist Details</h2>
+    <form asp-action="CreatePlaylist" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="Name">Playlist Name</label>
+            <input type="text" id="Name" name="Name" class="form-control" value="@Model.Name" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ImageFile">Playlist Image</label>
+            <input type="file" id="ImageFile" name="ImageFile" class="form-control" />
+        </div>
+
+        <!-- Hidden field to carry over the list of song URIs -->
+        @for (int i = 0; i < Model.SongUris.Count; i++)
+        {
+            <input type="hidden" name="SongUris[@i]" value="@Model.SongUris[i]" />
+        }
+
+        <button type="submit" class="btn btn-success mt-3">Create Playlist</button>
+    </form>
+</div>
