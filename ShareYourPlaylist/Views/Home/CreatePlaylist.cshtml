@@ -1,0 +1,31 @@
+﻿@model ShareYourPlaylist.Models.CreatePlaylistViewModel
+
+@{
+    ViewData["Title"] = "Create a New Playlist";
+}
+
+<h2>Create a New Playlist</h2>
+
+<form asp-action="CreatePlaylist" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Name">Playlist Name</label>
+        <input asp-for="Name" class="form-control" placeholder="Enter playlist name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ImageFile">Playlist Image (optional)</label>
+        <input asp-for="ImageFile" type="file" class="form-control-file" />
+        <span asp-validation-for="ImageFile" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Playlist</button>
+</form>
+
+<a asp-action="Playlists" class="btn btn-secondary">Back to Playlists</a>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

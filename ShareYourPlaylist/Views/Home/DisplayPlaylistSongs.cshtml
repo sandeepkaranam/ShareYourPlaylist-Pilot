@@ -1,0 +1,119 @@
+﻿@model ShareYourPlaylist.Models.PlaylistViewModel
+
+<div class="container">
+    <h1>@Model.Name</h1>
+
+    @if (ViewData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @ViewData["Error"]
+        </div>
+    }
+
+    <!-- Display Playlist Image -->
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-thumbnail" style="max-width: 300px; margin-bottom: 20px;">
+    }
+
+    <!-- Share Button -->
+    <div class="mt-3">
+        <button class="btn btn-info" onclick="sharePlaylist('@Model.Id', '@Model.Name')">Share Playlist</button>
+    </div>
+
+    <h2 class="mt-4">Songs in Playlist</h2>
+
+    <ul class="list-group">
+        @foreach (var song in Model.Songs)
+        {
+            <li class="list-group-item">
+                <div class="d-flex align-items-center justify-content-between">
+                    <!-- Song Image -->
+                    @if (!string.IsNullOrEmpty(song.ImageUrl))
+                    {
+                        <img src="@song.ImageUrl" alt="@song.Name" class="img-thumbnail" style="width: 50px; height: 50px; margin-right: 15px;">
+                    }
+
+                    <!-- Song Details -->
+                    <div class="flex-grow-1">
+                        <strong>@song.Name</strong><br />
+                        <small>Artist: @song.Artist | Album: @song.Album</small>
+                    </div>
+
+                    <!-- Edit and Remove Buttons -->
+                    <div>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="toggleEditForm('@song.Id')">Edit</button>
+                        <form asp-action="RemoveSongFromPlaylist" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this song?');">
+                            <input type="hidden" name="playlistId" value="@Model.Id" />
+                            <input type="hidden" name="songUri" value="@song.SpotifyUri" />
+                            <button type="submit" class="btn btn-danger btn-sm ml-2">Remove</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Hidden Edit Form -->
+                <div id="editForm-@song.Id" style="display:none;" class="mt-3">
+                    <form asp-action="EditSong" method="post">
+                        <input type="hidden" name="playlistId" value="@Model.Id" />
+                        <input type="hidden" name="songUri" value="@song.SpotifyUri" />
+                        <input type="hidden" name="songId" value="@song.Id" />
+                        <div class="form-group">
+                            <label for="newArtist">Edit Artist</label>
+                            <input type="text" name="newArtist" value="@song.Artist" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="newAlbum">Edit Album</label>
+                            <input type="text" name="newAlbum" value="@song.Album" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-2">Update</button>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="toggleEditForm('@song.Id')">Cancel</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+
+    <!-- Add Song Form -->
+    <div class="mt-4">
+        <h3>Add a New Song</h3>
+        <form asp-action="AddSongToPlaylist" method="post" onsubmit="return confirm('Are you sure you want to add this song?');">
+            <input type="hidden" name="playlistId" value="@Model.Id" />
+            <div class="form-group">
+                <label for="songUri">Spotify URI of Song</label>
+                <input type="text" id="songUri" name="songUri" class="form-control" placeholder="spotify:track:TRACK_ID" required />
+            </div>
+            <button type="submit" class="btn btn-success mt-2">Add Song</button>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript for Toggling Edit Form and Sharing Playlist -->
+<script>
+    function toggleEditForm(songId) {
+        var editForm = document.getElementById('editForm-' + songId);
+        if (editForm.style.display === 'none') {
+            editForm.style.display = 'block';
+        } else {
+            editForm.style.display = 'none';
+        }
+    }
+
+    function sharePlaylist(playlistId, playlistName) {
+        const baseUrl = window.location.origin;
+        const playlistUrl = `${baseUrl}/Home/DisplayPlaylistSongs?playlistId=${playlistId}`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: playlistName,
+                url: playlistUrl
+            }).catch(error => console.log('Error sharing', error));
+        } else {
+            // Fallback for copying link
+            navigator.clipboard.writeText(playlistUrl).then(() => {
+                alert("Playlist link copied to clipboard!");
+            }).catch(err => {
+                alert("Failed to copy link: " + err);
+            });
+        }
+    }
+</script>

@@ -1,0 +1,47 @@
+﻿@model ShareYourPlaylist.Models.PlaylistsViewModel
+
+<div class="container text-center">
+    
+
+    @if (ViewData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @ViewData["Error"]
+        </div>
+    }
+
+    <h2 class="mt-4 text-white">Trending Playlists</h2>
+
+    <div class="row mt-4">
+        @foreach (var playlist in Model.Playlists)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <!-- Playlist Image -->
+                    @if (!string.IsNullOrEmpty(playlist.ImageUrl))
+                    {
+                        <img src="@playlist.ImageUrl" class="card-img-top" alt="@playlist.Name" style="height: 200px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <img src="~/images/default-playlist-image.jpg" class="card-img-top" alt="Default Playlist Image" style="height: 200px; object-fit: cover;">
+                    }
+
+                    <div class="card-body">
+                        <h5 class="card-title" style="color:black">@playlist.Name</h5>
+
+                        <div class="d-flex justify-content-between">
+                            <!-- View Songs Button -->
+                            <a asp-action="DisplayPlaylistSongs" asp-route-playlistId="@playlist.Id" class="btn btn-primary">View Songs</a>
+
+                            <!-- Delete Playlist Form -->
+                            <form asp-action="DeletePlaylist" asp-route-playlistId="@playlist.Id" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this playlist?');">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
