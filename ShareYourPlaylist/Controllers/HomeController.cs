@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using ShareYourPlaylist.Models;
 using ShareYourPlaylist.Services;
 using ShareYourPlaylist.Data;
+using ShareYourPlaylist.Views.Home;
 
 namespace ShareYourPlaylist.Controllers
 {
@@ -50,6 +52,45 @@ namespace ShareYourPlaylist.Controllers
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public IActionResult CreatePlaylist(CreatePlaylistViewModel model)
         {
+            if (!string.IsNullOrEmpty(songUri))
+            {
+                model.SongUris.Add(songUri);
+                TempData["SuccessMessage"] = "Song URI added successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid Spotify URI.";
+            }
+            return View("CreatePlaylist", model); // Renders the form with the updated list
+        }
+
+        //// Handle create playlist form submission
+        //[HttpPost]
+        //public IActionResult CreatePlaylist(CreatePlaylistViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Create a new playlist
+        //        var playlist = new PlaylistViewModel
+        //        {
+        //            Id = Guid.NewGuid().ToString(),
+        //            Name = model.Name,
+        //            ImageUrl = model.ImageFile != null ? UploadImage(model.ImageFile) : GenerateDefaultImage(),
+        //            Songs = model.SongUris.Select(uri => new SongViewModel { SpotifyUri = uri }).ToList() // Prepopulate with song URIs
+        //        };
+
+        //        // Add the playlist to the data store
+        //        _dataStore.AddPlaylist(playlist);
+
+        //        TempData["SuccessMessage"] = "Playlist created successfully!";
+        //        return RedirectToAction("Playlists");
+        //    }
+        //    return View(model);
+        //}
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePlaylist(CreatePlaylistViewModel model)
+        {
             if (ModelState.IsValid)
             {
                 // Initialize a new playlist
@@ -63,6 +104,18 @@ namespace ShareYourPlaylist.Controllers
 
                 // Add the new playlist to the data store
                 _dataStore.AddPlaylist(playlist);
+
+                // Add songs based on URIs provided
+                foreach (var songUri in model.SongUris)
+                {
+                    var song = await APIController.Instance.GetSongDetailsAsync(token, songUri);
+                    if (song != null)
+                    {
+                        playlist.Songs.Add(song); // Add the song details to the playlist
+                    }
+                }
+
+                _dataStore.AddPlaylist(playlist); // Save the playlist with songs
 
                 TempData["SuccessMessage"] = "Playlist created successfully!";
                 //return RedirectToAction("AddSongsToPlaylist", new { playlistId = playlist.Id });
@@ -119,7 +172,6 @@ namespace ShareYourPlaylist.Controllers
             }
 
             ViewData["Error"] = "Invalid song URI.";
-            return RedirectToAction("AddSongsToPlaylist", new { playlistId });
         }
 
 

@@ -1,7 +1,7 @@
 ﻿@model ShareYourPlaylist.Models.PlaylistsViewModel
 
 <div class="container text-center">
-    
+
 
     @if (ViewData["Error"] != null)
     {
@@ -32,7 +32,7 @@
 
                         <div class="d-flex justify-content-between">
                             <!-- View Songs Button -->
-                            <a asp-action="DisplayPlaylistSongs" asp-route-playlistId="@playlist.Id" class="btn btn-primary">View Songs</a>
+                        <a asp-action="DisplayPlaylistSongs" asp-route-playlistId="@playlist.Id" class="btn btn-primary">View Songs</a>
 
                             <!-- Delete Playlist Form -->
                             <form asp-action="DeletePlaylist" asp-route-playlistId="@playlist.Id" method="post" style="display:inline;">
@@ -45,3 +45,4 @@
         }
     </div>
 </div>
+

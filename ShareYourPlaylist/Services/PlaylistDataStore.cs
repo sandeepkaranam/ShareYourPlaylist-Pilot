@@ -33,7 +33,12 @@ namespace ShareYourPlaylist.Data
                 {
                     var fetchedPlaylists = await apiController.GetRandomPlaylistsAsync(token, 10);
                     playlists = fetchedPlaylists ?? new List<PlaylistViewModel>();
-                    isInitialized = true;
+                        isInitialized = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to fetch playlists from Spotify API.");
+                    }
                 }
                 else
                 {
@@ -107,7 +112,7 @@ namespace ShareYourPlaylist.Data
             var playlist = GetPlaylistById(playlistId);
             var song = playlist?.Songs.FirstOrDefault(s => s.Id == songId);
             if (song != null)
-            {
+                    {
                 song.Artist = newArtist;
                 song.Album = newAlbum;
             }
@@ -159,17 +164,21 @@ namespace ShareYourPlaylist.Data
                         ImageUrl = trackJson.GetProperty("album").GetProperty("images")[0].GetProperty("url").GetString(),
                         SpotifyUri = songUri
                     };
+
+                    return song;
                 }
                 else
                 {
                     Console.WriteLine($"Failed to fetch song details: {response.StatusCode}");
+                    return null;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
-            return null;
+                return null;
+            }
         }
 
         // Helper method to extract track ID from song URI
